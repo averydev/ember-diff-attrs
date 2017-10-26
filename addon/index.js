@@ -1,5 +1,6 @@
 import WeakMap from 'ember-weakmap';
 
+
 function isEqual(key, a, b) {
   return a === b;
 }
@@ -17,7 +18,7 @@ export default function(keys, hook) {
       isEqualFunc = options.isEqual;
     }
 
-    if (options.watchArrayLength === true) {
+    if(options.watchArrayLength === true){
       watchArrayLength = true;
     }
 
@@ -42,7 +43,6 @@ export default function(keys, hook) {
       oldValuesMap.set(this, {});
     }
 
-
     oldValues = oldValuesMap.get(this);
 
     keys.forEach(key => {
@@ -53,16 +53,13 @@ export default function(keys, hook) {
         changedAttrs[key] = [oldValues[key], value];
         oldValues[key] = value;
       }
-      if (watchArrayLength && attrIsArray) {
+      if (watchArrayLength && attrIsArray){
 
         let oldLength = (oldValuesMap.get(value) == null) ? 0 : oldValuesMap.get(value).length;
         if (oldLength !== value.length) {
           changedAttrs[key] = [oldValues[key], value];
           oldValues[key] = value;
-          oldValuesMap.set(this, {
-            obj: value,
-            length: value.length
-          });
+          oldValuesMap.set(value, {obj:value, length:value.length});
         }
       }
     });
