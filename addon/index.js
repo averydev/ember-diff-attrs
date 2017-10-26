@@ -1,12 +1,12 @@
 import WeakMap from 'ember-weakmap';
 
-
 function isEqual(key, a, b) {
   return a === b;
 }
 
 export default function(keys, hook) {
   let oldValuesMap = new WeakMap();
+  let watchArrayLength = false;
   let isEqualFunc = isEqual;
 
   if (typeof keys === 'object') {
@@ -16,6 +16,11 @@ export default function(keys, hook) {
     if (options.isEqual) {
       isEqualFunc = options.isEqual;
     }
+
+    if (options.watchArrayLength === true) {
+      watchArrayLength = true;
+    }
+
     if (options.hook) {
       hook = options.hook;
     }
@@ -33,16 +38,32 @@ export default function(keys, hook) {
 
     if (!oldValuesMap.has(this)) {
       isFirstCall = true;
+      const stateObj = {};
       oldValuesMap.set(this, {});
     }
+
 
     oldValues = oldValuesMap.get(this);
 
     keys.forEach(key => {
       let value = this.get(key);
+      let attrIsArray = Array.isArray(value);
+
       if (!isEqualFunc(key, oldValues[key], value)) {
         changedAttrs[key] = [oldValues[key], value];
         oldValues[key] = value;
+      }
+      if (watchArrayLength && attrIsArray) {
+
+        let oldLength = (oldValuesMap.get(value) == null) ? 0 : oldValuesMap.get(value).length;
+        if (oldLength !== value.length) {
+          changedAttrs[key] = [oldValues[key], value];
+          oldValues[key] = value;
+          oldValuesMap.set(this, {
+            obj: value,
+            length: value.length
+          });
+        }
       }
     });
 
